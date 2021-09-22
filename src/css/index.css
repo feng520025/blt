@@ -1,0 +1,59 @@
+/* 1.主题色 --- 黑色 #08080f */
+
+/* 1.容器色 --- 黑色 #2b2c2b */
+
+/* 3.浅灰色 --- #696969 */
+
+/* 4.主文字颜色 --- 白色 */
+
+/* .black {
+
+}
+.am-wingblank .black_85 {
+    background: #9370DB!important;
+    opacity: 0.85;
+}
+.am-wingblank .am-list-item {
+    background: #9370DB!important;
+    opacity: 0.8;
+}
+.am-wingblank .item-header {
+    background: #9370DB!important;
+    opacity: 0.7;
+}
+.am-modal-content {
+    
+}
+.black_60 {
+
+}
+.king {
+    color: #c0a26d!important;
+}
+.white {
+    color: #fff!important;
+}
+
+.am-list-header .am-button span {
+    color: #f7b500!important;
+}
+.am-list-header .am-button {
+    border-color: #f7b500!important;
+} */
+
+.title {
+    /* color: #c76b5f!important; */
+}
+
+.footer p {
+    margin-bottom: 0!important;
+}
+
+.header {
+    /* height: 154px!important; */
+}
+
+.header img {
+    margin-top: 38px;
+    width: 100%;
+}

@@ -1,0 +1,58 @@
+div {
+    color: #999;
+}
+/* 头部 */
+.header {
+    height: 173px;
+    background-color: #9370DB!important;
+}
+
+.header img {
+    margin-top: 63px;
+    width: 47%;
+}
+
+/* 底部 */
+.footer p {
+    color: #999;
+}
+
+/* 金色字体 */
+
+.am-list-header .title {
+    color: #9370DB!important;
+}
+
+/* 我的账户容器样式 */
+
+.am-list-body {
+    border: 1px solid #999!important;
+    border-radius: 4px!important;
+}
+
+.am-list-item {
+    background: #fff!important;
+}
+
+/* 我的账户字体颜色 */
+
+.column-title {
+    color: #000!important;
+}
+
+.column-value {
+    color: #000!important;
+}
+
+/* 按钮样式 */
+
+.am-button {
+    background: #9370DB!important;
+    border: 1PX solid #9370DB!important;
+}
+
+/* 我的业绩 */
+
+.item-header {
+    background: #9370DB!important;
+}
