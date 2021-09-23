@@ -3,4 +3,4 @@
 
 Let SERO currency value consensus  
 Let SERO value symbiosis  
-Let SERO's market value win-win  
+Let SERO's market value win-win     
