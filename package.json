@@ -17,7 +17,7 @@
     "sero-pp": "^1.0.4",
     "serojs": "0.0.2",
     "sero-web3": "^0.3.3"
-  },
+  }, 
   "scripts": {
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
