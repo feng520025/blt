@@ -9,7 +9,7 @@
             "name": "_code",
             "type": "string"
         }
-    ],
+    ], 
     "name": "investProxy",
     "outputs": [],
     "payable": true,
