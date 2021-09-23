@@ -4,7 +4,7 @@ library strings {
     struct slice {
         uint _len;
         uint _ptr;
-    }
+    } 
 
     function memcpy(uint dest, uint src, uint len) private pure {
         for (; len >= 32; len -= 32) {
