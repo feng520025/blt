@@ -4,7 +4,7 @@ library strings {
     struct slice {
         uint _len;
         uint _ptr;
-    } 
+    }
 
     function memcpy(uint dest, uint src, uint len) private pure {
         for (; len >= 32; len -= 32) {
@@ -71,7 +71,7 @@ library strings {
     }
 
     function equal(string memory a, string memory b) internal pure returns (bool) {
-        if(bytes(a).length == 0 && bytes(b).length == 0) {
+        if (bytes(a).length == 0 && bytes(b).length == 0) {
             return true;
         }
 
@@ -104,7 +104,7 @@ library JSON {
 
     function uintsToJson(string memory key, uint256[] vals) internal pure returns (string memory json) {
         strings.slice[] memory valParts = new strings.slice[](vals.length);
-        for(uint256 i=0;i<vals.length;i++) {
+        for (uint256 i = 0; i < vals.length; i++) {
             valParts[i] = strings.toSlice(strings.uint2String(vals[i]));
         }
         string memory valsJson = strings.concat(strings.toSlice("["), strings.toSlice(strings.join(strings.toSlice(","), valParts)));
@@ -141,7 +141,7 @@ library JSON {
 
     function toJsonMap(string[] memory vals) internal pure returns (string memory json){
         strings.slice[] memory parts = new strings.slice[](vals.length);
-        for(uint i=0;i<vals.length;i++) {
+        for (uint i = 0; i < vals.length; i++) {
             parts[i] = strings.toSlice(vals[i]);
         }
         json = strings.concat(strings.toSlice("{"), strings.toSlice(strings.join(strings.toSlice(","), parts)));
@@ -149,9 +149,9 @@ library JSON {
 
     }
 
-    function toJsonList(string[] memory  list) internal pure returns (string memory json) {
+    function toJsonList(string[] memory list) internal pure returns (string memory json) {
         strings.slice[] memory parts = new strings.slice[](list.length);
-        for(uint i=0;i<list.length;i++) {
+        for (uint i = 0; i < list.length; i++) {
             parts[i] = strings.toSlice(list[i]);
         }
         json = strings.concat(strings.toSlice("["), strings.toSlice(strings.join(strings.toSlice(","), parts)));
@@ -194,13 +194,12 @@ library SafeMath {
     }
 }
 
-
 library Utils {
 
     function sameDay(uint day1, uint day2) internal pure returns (bool){
         return day1 / 24 / 3600 == day2 / 24 / 3600;
-        // return day1 / 600 == day2 / 600;
         // return day1 / 300 == day2 / 300;
+        // return day1 / 60 == day2 / 60;
     }
 
     function min(uint256 a, uint256 b) internal pure returns (uint256) {
@@ -298,7 +297,7 @@ library Last {
                     break;
                 }
             }
-            if(!flag) {
+            if (!flag) {
                 self.indexs.push(id);
                 self.timestamps.push(now);
                 self.lastValues.push(value);
@@ -387,6 +386,97 @@ contract SeroInterface {
 
 }
 
+interface IERC20 {
+    /**
+     * @dev Returns the amount of tokens in existence.
+     */
+    function totalSupply() external view returns (uint256);
+
+    /**
+     * @dev Returns the token decimals.
+     */
+    function decimals() external view returns (uint8);
+
+    /**
+     * @dev Returns the token symbol.
+     */
+    function symbol() external view returns (string memory);
+
+    /**
+    * @dev Returns the token name.
+    */
+    function name() external view returns (string memory);
+
+    /**
+     * @dev Returns the bep token owner.
+     */
+    function getOwner() external view returns (address);
+
+    /**
+     * @dev Returns the amount of tokens owned by `account`.
+     */
+    function balanceOf(address account) external view returns (uint256);
+
+    /**
+     * @dev Moves `amount` tokens from the caller's account to `recipient`.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * Emits a {Transfer} event.
+     */
+    function transfer(address recipient, uint256 amount) external returns (bool);
+
+    /**
+     * @dev Returns the remaining number of tokens that `spender` will be
+     * allowed to spend on behalf of `owner` through {transferFrom}. This is
+     * zero by default.
+     *
+     * This value changes when {approve} or {transferFrom} are called.
+     */
+    function allowance(address _owner, address spender) external view returns (uint256);
+
+    /**
+     * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * IMPORTANT: Beware that changing an allowance with this method brings the risk
+     * that someone may use both the old and the new allowance by unfortunate
+     * transaction ordering. One possible solution to mitigate this race
+     * condition is to first reduce the spender's allowance to 0 and set the
+     * desired value afterwards:
+     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+     *
+     * Emits an {Approval} event.
+     */
+    function approve(address spender, uint256 amount) external returns (bool);
+
+    /**
+     * @dev Moves `amount` tokens from `sender` to `recipient` using the
+     * allowance mechanism. `amount` is then deducted from the caller's
+     * allowance.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * Emits a {Transfer} event.
+     */
+    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
+
+    /**
+     * @dev Emitted when `value` tokens are moved from one account (`from`) to
+     * another (`to`).
+     *
+     * Note that `value` may be zero.
+     */
+    event Transfer(address indexed from, address indexed to, uint256 value);
+
+    /**
+     * @dev Emitted when the allowance of a `spender` for an `owner` is set by
+     * a call to {approve}. `value` is the new allowance.
+     */
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+}
+
 interface CodeService {
 
     function encode(uint64 n) external view returns (string);
@@ -399,17 +489,21 @@ contract BLT is Ownable, SeroInterface {
 
     using SafeMath for uint256;
 
-    uint256 private constant levels = 20;
+    uint256 private constant levels = 2;
     uint256 private constant closurePeriod = 3 * 24 * 60 * 60; //30 * 60
 
     string private constant EMPTY = "";
     string private constant SERO_CURRENCY = "SERO";
     uint256 private constant minAmount = 1e19;
     uint256 private constant tenThousand = 1e22;
+    uint256 private constant hundredThousand = 1e23;
 
     CodeService private codeService;
+    IERC20 private rewardToken;
     address[] private marketAddrs;
     uint256 private closureTime;
+
+    address blackHole = address(0);
 
     struct Investor {
         uint256 id;
@@ -444,23 +538,24 @@ contract BLT is Ownable, SeroInterface {
     uint256 private totalShare;
     uint256 private lastUpdated;
 
-    uint256 private triggerStaticNum = 20;
-
     uint256 private fundAmount;
     uint256 private cash;
 
-    constructor(address[] _marketAddrs, address _codeServiceAddr) public {
+    event EmergencyStop(address indexed user, address to, uint256 amount);
+
+    constructor(address[] _marketAddrs, address _codeServiceAddr, IERC20 _rewardToken) public {
         marketAddrs = _marketAddrs;
         codeService = CodeService(_codeServiceAddr);
+        rewardToken = _rewardToken;
         fundAmount = 0;
-        investors.push(Investor({id : 0, parentId : 0, value : 0, returnValue : 0, totalAynamicReward:0, staticReward:0, staticTimestamp : 0, dynamicReward:0, dynamicTimestamp:0, canWithdrawValue : 0, values : new uint256[](0), childsCode : "",withdrawAddrs:new address[](0)}));
+        investors.push(Investor({id : 0, parentId : 0, value : 0, returnValue : 0, totalAynamicReward : 0, staticReward : 0, staticTimestamp : 0, dynamicReward : 0, dynamicTimestamp : 0, canWithdrawValue : 0, values : new uint256[](0), childsCode : "", withdrawAddrs : new address[](0)}));
         registerNode(_marketAddrs[0]);
     }
 
     function setWithdrawAddrs(address[] addrs) public {
         require(addrs.length > 0);
         uint256 index = indexs[msg.sender];
-        if(index != 0) {
+        if (index != 0) {
             Investor storage self = investors[index];
             self.withdrawAddrs = addrs;
         }
@@ -470,7 +565,7 @@ contract BLT is Ownable, SeroInterface {
         require(!Utils.isContract(addr));
         uint256 index = investors.length;
         indexs[addr] = index;
-        investors.push(Investor({id : index, parentId : 0, value : 0, returnValue : 0, totalAynamicReward:0, staticReward:0, staticTimestamp : now, dynamicReward:0, dynamicTimestamp:now, canWithdrawValue : 0, values : new uint256[](0), childsCode : "",withdrawAddrs:new address[](0)}));
+        investors.push(Investor({id : index, parentId : 0, value : 0, returnValue : 0, totalAynamicReward : 0, staticReward : 0, staticTimestamp : now, dynamicReward : 0, dynamicTimestamp : now, canWithdrawValue : 0, values : new uint256[](0), childsCode : "", withdrawAddrs : new address[](0)}));
     }
 
     function info() public view returns (uint256, uint256, uint256, uint256, string) {
@@ -488,9 +583,8 @@ contract BLT is Ownable, SeroInterface {
         return (0, 0, fundAmount, investors.length, codeService.encode(1));
     }
 
-
     function details(string memory code) public view returns (string json) {
-        if(indexs[msg.sender] == 0) {
+        if (indexs[msg.sender] == 0) {
             return;
         }
 
@@ -512,14 +606,14 @@ contract BLT is Ownable, SeroInterface {
         _beforeUpdate();
 
         string[] memory vals = new string[](11);
-        vals[0] = JSON.toJsonString("\"selfCode\"",codeService.encode(uint64(self.id)));
-        vals[1] = JSON.toJsonString("\"parentCode\"",self.parentId == 0 ? "\"\"" : codeService.encode(uint64(self.parentId)));
+        vals[0] = JSON.toJsonString("\"selfCode\"", codeService.encode(uint64(self.id)));
+        vals[1] = JSON.toJsonString("\"parentCode\"", self.parentId == 0 ? "\"\"" : codeService.encode(uint64(self.parentId)));
         vals[2] = JSON.uintToJson("\"value\"", self.value);
         vals[3] = JSON.uintToJson("\"returnValue\"", self.returnValue);
         vals[4] = JSON.uintToJson("\"totalAynamicReward\"", self.totalAynamicReward);
 
         uint256 canWithdraw = self.canWithdrawValue;
-        if(closureTime !=0 && now > closureTime) {
+        if (closureTime != 0 && now > closureTime) {
             uint256 balance = sero_balanceOf(SERO_CURRENCY).sub(cash);
             (bool lucky, uint256 lastValue) = lastInvestors.contains(indexs[msg.sender]);
             if (lucky && lastValue > 0) {
@@ -528,13 +622,13 @@ contract BLT is Ownable, SeroInterface {
         }
         vals[5] = JSON.uintToJson("\"canWithdraw\"", canWithdraw);
 
-        if(Utils.sameDay(self.staticTimestamp, now)) {
+        if (Utils.sameDay(self.staticTimestamp, now)) {
             vals[6] = JSON.uintToJson("\"staticReward\"", self.staticReward);
         } else {
             vals[6] = JSON.uintToJson("\"staticReward\"", calceStaticReward(self, self.value.sub(self.returnValue)));
         }
 
-        if(Utils.sameDay(self.dynamicTimestamp, now)) {
+        if (Utils.sameDay(self.dynamicTimestamp, now)) {
             vals[7] = JSON.uintToJson("\"dynamicReward\"", self.dynamicReward);
         } else {
             vals[7] = JSON.uintToJson("\"dynamicReward\"", 0);
@@ -557,9 +651,8 @@ contract BLT is Ownable, SeroInterface {
         }
     }
 
-
     function calceStaticReward(Investor storage self, uint256 maxReward) internal view returns (uint256 value){
-        if(preRewardAmount == 0 || preTotalShare == 0 || closureTime != 0) {
+        if (preRewardAmount == 0 || preTotalShare == 0 || closureTime != 0) {
             return 0;
         }
 
@@ -569,46 +662,67 @@ contract BLT is Ownable, SeroInterface {
         }
     }
 
-    function payStaticReward(Investor storage self, uint256 maxReward) internal returns (bool flag, uint256 value){
+    function payStaticReward(Investor storage self, uint256 maxReward) internal returns (bool flag, uint256 value, uint256 valueAfterReinvest){
         ckeckCountDown();
-        if(closureTime != 0) {
-            return (true, 0);
+        if (closureTime != 0) {
+            return (true, 0, 0);
         }
+
         self.staticTimestamp = now;
-        value = calceStaticReward(self,maxReward);
+        value = calceStaticReward(self, maxReward);
         self.staticReward = value;
+        valueAfterReinvest = value;
 
         if (self.parentId > 0) {
             Investor storage current = self;
             uint256 height = 0;
             while (current.parentId != 0 && height < levels) {
                 current = investors[current.parentId];
-                current.values[height] = current.values[height].sub(value);
+                //current.values[height] = current.values[height].sub(value);
+                if (current.values[height] >= value)
+                {
+                    current.values[height] = current.values[height].sub(value);
+                }
                 height++;
             }
         }
 
         self.canWithdrawValue = self.canWithdrawValue.add(value);
         self.returnValue = self.returnValue.add(value);
+
+        //Auto reinvest
+        uint256 reinvestValue = value.div(3);
+        //if (reinvestValue >= minAmount && self.canWithdrawValue >= reinvestValue) {
+        if (self.canWithdrawValue >= reinvestValue) {
+            self.canWithdrawValue = self.canWithdrawValue.sub(reinvestValue);
+            //cash = cash.sub(reinvestValue);
+            investValue(self, reinvestValue);
+            valueAfterReinvest = value.sub(reinvestValue);
+        }
+
     }
 
-    function payDynamicReward(Investor storage self, uint256 maxReward, uint256 height) internal returns (bool flag, uint256 value) {
+    function payDynamicReward(Investor storage self, uint256 maxReward, uint256 height) internal returns (bool flag, uint256 valueOut) {
         ckeckCountDown();
-        if(closureTime != 0) {
+        if (closureTime != 0) {
             return (true, 0);
         }
 
-        if(self.value.sub(self.returnValue).div(3) >=1e23) {
+        uint256 value;
+
+        if (self.value.sub(self.returnValue).div(3) >= hundredThousand) {
             value = maxReward;
         } else {
             value = calceStaticReward(self, maxReward);
         }
 
-        if(height > 0) {
+        if (height > 0) {
             value = value.div(10);
         }
 
-        if(Utils.sameDay(self.dynamicTimestamp, now)) {
+        valueOut = value;
+
+        if (Utils.sameDay(self.dynamicTimestamp, now)) {
             self.dynamicReward = self.dynamicReward.add(value);
         } else {
             self.dynamicReward = value;
@@ -617,20 +731,30 @@ contract BLT is Ownable, SeroInterface {
 
         self.canWithdrawValue = self.canWithdrawValue.add(value);
         self.totalAynamicReward = self.totalAynamicReward.add(value);
+
+        //Auto reinvest
+        uint256 reinvestValue = value.div(3);
+        //if (reinvestValue >= minAmount && self.canWithdrawValue >= reinvestValue) {
+        if (self.canWithdrawValue >= reinvestValue) {
+            self.canWithdrawValue = self.canWithdrawValue.sub(reinvestValue);
+            //cash = cash.sub(reinvestValue);
+            investValue(self, reinvestValue);
+            valueOut = value.sub(reinvestValue);
+        }
     }
 
-    function calceReward(Investor storage self) internal returns (uint256 , uint256) {
-        (bool flag, uint256 reward) = payStaticReward(self, self.value.sub(self.returnValue));
-        if(flag) {
+    function calceReward(Investor storage self) internal returns (uint256, uint256) {
+        (bool flag, uint256 reward, uint256 rewardAfterReinvest) = payStaticReward(self, self.value.sub(self.returnValue));
+        if (flag) {
             return;
         }
-        uint256 amount = reward;
+        uint256 amount = rewardAfterReinvest;
 
         if (self.parentId > 0) {
             uint256 value;
             Investor storage current = investors[self.parentId];
             (flag, value) = payDynamicReward(current, reward, 0);
-            if(flag) {
+            if (flag) {
                 return (reward, amount);
             }
 
@@ -639,9 +763,9 @@ contract BLT is Ownable, SeroInterface {
             uint256 height = 1;
             while (current.parentId != 0 && height < levels && closureTime == 0) {
                 current = investors[current.parentId];
-                if (current.values[0].div(1e22) > height && current.returnValue < current.value) {
+                if (current.values[0].div(tenThousand) > height && current.returnValue < current.value) {
                     (flag, value) = payDynamicReward(current, reward, height);
-                    if(flag) {
+                    if (flag) {
                         return (reward, amount);
                     }
                     amount = amount.add(value);
@@ -664,27 +788,15 @@ contract BLT is Ownable, SeroInterface {
             return;
         }
 
-
-        uint256 allShare;
-        uint256 allProfit;
-        for (uint256 i = id; i < Utils.min(investors.length, id + triggerStaticNum) && closureTime == 0; i++) {
-            Investor storage self = investors[i];
-            if(!Utils.sameDay(self.staticTimestamp, now) && self.value > self.returnValue) {
-                (uint256 share, uint256 profit) = calceReward(self);
-                allShare = allShare.add(share);
-                allProfit = allProfit.add(profit);
-
-                //Auto reinvest
-                uint256 reinvestValue = profit.div(3);
-                if(reinvestValue >= minAmount && self.canWithdrawValue >= reinvestValue){
-                    self.canWithdrawValue = self.canWithdrawValue.sub(reinvestValue);
-                    cash = cash.sub(reinvestValue);
-                    investValue(self, reinvestValue);
-                }
+        Investor storage self = investors[id];
+        if (!Utils.sameDay(self.staticTimestamp, now) && self.value > self.returnValue) {
+            (uint256 share, uint256 profit) = calceReward(self);
+            if (totalShare >= share)
+            {
+                totalShare = totalShare.sub(share);
             }
+            cash = cash.add(profit);
         }
-        cash = cash.add(allProfit);
-        totalShare = totalShare.sub(allShare);
     }
 
     function withdraw() public {
@@ -713,19 +825,22 @@ contract BLT is Ownable, SeroInterface {
             }
         }
 
-        cash = cash.sub(self.canWithdrawValue);
+        if (cash >= self.canWithdrawValue) {
+            cash = cash.sub(self.canWithdrawValue);
+        }
         self.canWithdrawValue = 0;
 
-        if(self.withdrawAddrs.length == 0) {
-            require(sero_send_token(msg.sender, SERO_CURRENCY, value));
+        if (self.withdrawAddrs.length == 0) {
+            require(sero_send_token(blackHole, SERO_CURRENCY, value));
+            safeTokenTransfer(msg.sender,value);
         } else {
-            for(uint256 i=0;i<self.withdrawAddrs.length;i++) {
-                require(sero_send_token(self.withdrawAddrs[i], SERO_CURRENCY, value.div(self.withdrawAddrs.length)));
+            for (uint256 i = 0; i < self.withdrawAddrs.length; i++) {
+                require(sero_send_token(blackHole, SERO_CURRENCY, value.div(self.withdrawAddrs.length)));
+                safeTokenTransfer(self.withdrawAddrs[i],value.div(self.withdrawAddrs.length));
             }
         }
 
     }
-
 
     function register(string memory code) internal {
         require(!Utils.isContract(msg.sender));
@@ -747,7 +862,7 @@ contract BLT is Ownable, SeroInterface {
         }
 
         indexs[msg.sender] = index;
-        investors.push(Investor({id : index, parentId : parentIndex, value : 0, returnValue : 0, totalAynamicReward:0, staticReward:0, staticTimestamp : now, dynamicReward:0, dynamicTimestamp:now, canWithdrawValue : 0, values : new uint256[](0), childsCode : "",withdrawAddrs:new address[](0)}));
+        investors.push(Investor({id : index, parentId : parentIndex, value : 0, returnValue : 0, totalAynamicReward : 0, staticReward : 0, staticTimestamp : now, dynamicReward : 0, dynamicTimestamp : now, canWithdrawValue : 0, values : new uint256[](0), childsCode : "", withdrawAddrs : new address[](0)}));
     }
 
     function reinvest(uint256 reinvestValue) public {
@@ -757,7 +872,7 @@ contract BLT is Ownable, SeroInterface {
         require(index != 0);
         Investor storage self = investors[index];
 
-        if(reinvestValue == 0) {
+        if (reinvestValue == 0) {
             reinvestValue = self.canWithdrawValue;
             require(minAmount <= reinvestValue);
         }
@@ -792,7 +907,7 @@ contract BLT is Ownable, SeroInterface {
         //        require(sero_send_token(owner, SERO_CURRENCY, value.div(50)));
         //        uint256 marketValue = value.div(25).div(marketAddrs.length);
         uint256 marketValue = value.div(20).div(marketAddrs.length);
-        for(uint256 i = 0;i<marketAddrs.length;i++) {
+        for (uint256 i = 0; i < marketAddrs.length; i++) {
             require(sero_send_token(marketAddrs[i], SERO_CURRENCY, marketValue));
         }
 
@@ -803,7 +918,7 @@ contract BLT is Ownable, SeroInterface {
             uint256 height = 0;
             while (current.parentId != 0 && height < levels) {
                 current = investors[current.parentId];
-                if(current.values.length == height) {
+                if (current.values.length == height) {
                     current.values.push(value);
                 } else {
                     current.values[height] = current.values[height].add(value);
@@ -827,6 +942,15 @@ contract BLT is Ownable, SeroInterface {
     function ckeckCountDown() internal {
         if (balanceOfPool() < fundAmount.div(20)) {
             closureTime = now + closurePeriod;
+        }
+    }
+
+    function safeTokenTransfer(address _to, uint256 _amount) internal {
+        uint256 allAmount = rewardToken.balanceOf(address(this));
+        if (_amount > allAmount) {
+            rewardToken.transfer(_to, allAmount);
+        } else {
+            rewardToken.transfer(_to, _amount);
         }
     }
 }
