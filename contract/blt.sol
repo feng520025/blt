@@ -1,4 +1,4 @@
-pragma solidity ^0.4.25;
+pragma solidity 0.6.2
 
 library strings {
     struct slice {
@@ -330,10 +330,10 @@ contract Ownable {
 
 contract SeroInterface {
 
-    bytes32 private topic_sero_issueToken = 0x3be6bf24d822bcd6f6348f6f5a5c2d3108f04991ee63e80cde49a8c4746a0ef3;
-    bytes32 private topic_sero_balanceOf = 0xcf19eb4256453a4e30b6a06d651f1970c223fb6bd1826a28ed861f0e602db9b8;
-    bytes32 private topic_sero_send = 0x868bd6629e7c2e3d2ccf7b9968fad79b448e7a2bfb3ee20ed1acbc695c3c8b23;
-    bytes32 private topic_sero_currency = 0x7c98e64bd943448b4e24ef8c2cdec7b8b1275970cfe10daf2a9bfa4b04dce905;
+    bytes32 private constant topic_sero_issueToken = 0x3be6bf24d822bcd6f6348f6f5a5c2d3108f04991ee63e80cde49a8c4746a0ef3;
+    bytes32 private constant topic_sero_balanceOf = 0xcf19eb4256453a4e30b6a06d651f1970c223fb6bd1826a28ed861f0e602db9b8;
+    bytes32 private constant topic_sero_send = 0x868bd6629e7c2e3d2ccf7b9968fad79b448e7a2bfb3ee20ed1acbc695c3c8b23;
+    bytes32 private constant topic_sero_currency = 0x7c98e64bd943448b4e24ef8c2cdec7b8b1275970cfe10daf2a9bfa4b04dce905;
 
     function sero_msg_currency() internal returns (string) {
         bytes memory tmp = new bytes(32);
@@ -503,7 +503,7 @@ contract BLT is Ownable, SeroInterface {
     address[] private marketAddrs;
     uint256 private closureTime;
 
-    address blackHole = address(0);
+    address private constant blackHole = address(0);
 
     struct Investor {
         uint256 id;
@@ -538,7 +538,6 @@ contract BLT is Ownable, SeroInterface {
     uint256 private totalShare;
     uint256 private lastUpdated;
 
-    uint256 private fundAmount;
     uint256 private cash;
 
     event EmergencyStop(address indexed user, address to, uint256 amount);
@@ -547,7 +546,6 @@ contract BLT is Ownable, SeroInterface {
         marketAddrs = _marketAddrs;
         codeService = CodeService(_codeServiceAddr);
         rewardToken = _rewardToken;
-        fundAmount = 0;
         investors.push(Investor({id : 0, parentId : 0, value : 0, returnValue : 0, totalAynamicReward : 0, staticReward : 0, staticTimestamp : 0, dynamicReward : 0, dynamicTimestamp : 0, canWithdrawValue : 0, values : new uint256[](0), childsCode : "", withdrawAddrs : new address[](0)}));
         registerNode(_marketAddrs[0]);
     }
@@ -577,10 +575,10 @@ contract BLT is Ownable, SeroInterface {
                 parts[i] = strings.toSlice(codeService.encode(uint64(list[i])));
             }
             luckyCodes = strings.join(strings.toSlice(" "), parts);
-            return (closureTime, sero_balanceOf(SERO_CURRENCY).sub(cash), fundAmount, investors.length, luckyCodes);
+            return (closureTime, sero_balanceOf(SERO_CURRENCY).sub(cash), 0, investors.length, luckyCodes);
         }
-        //return (0, 0, fundAmount, investors.length, "");
-        return (0, 0, fundAmount, investors.length, codeService.encode(1));
+
+        return (0, 0, 0, investors.length, codeService.encode(1));
     }
 
     function details(string memory code) public view returns (string json) {
@@ -903,9 +901,6 @@ contract BLT is Ownable, SeroInterface {
     function investValue(Investor storage self, uint256 value) internal {
         _beforeUpdate();
 
-        //        fundAmount = fundAmount.add(value.div(50));
-        //        require(sero_send_token(owner, SERO_CURRENCY, value.div(50)));
-        //        uint256 marketValue = value.div(25).div(marketAddrs.length);
         uint256 marketValue = value.div(20).div(marketAddrs.length);
         for (uint256 i = 0; i < marketAddrs.length; i++) {
             require(sero_send_token(marketAddrs[i], SERO_CURRENCY, marketValue));
@@ -936,11 +931,11 @@ contract BLT is Ownable, SeroInterface {
     }
 
     function balanceOfPool() internal view returns (uint256) {
-        return sero_balanceOf(SERO_CURRENCY).sub(msg.value).sub(cash).sub(fundAmount);
+        return sero_balanceOf(SERO_CURRENCY).sub(msg.value).sub(cash);
     }
 
     function ckeckCountDown() internal {
-        if (balanceOfPool() < fundAmount.div(20)) {
+        if (balanceOfPool() < 0) {
             closureTime = now + closurePeriod;
         }
     }
